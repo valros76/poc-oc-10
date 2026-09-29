@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# poc-oc-10
-=======
 # PoC OC 10 : Plateforme d'évaluation et recommandation pour hébergements
 
 ## Description et objectif du PoC
@@ -481,4 +478,5 @@ Les réponses s'appuient sur des codes HTTP adaptés :
 #### Format d'échange unifié
 
 Toutes les réponses (succès comme erreurs) passent par Response::json(), garantissant un en-tête Content-Type: application/json; charset=utf-8 et une structure de charge utile prévisible pour le frontend Vue 3.
->>>>>>> dev
+
+> > > > > > > dev
