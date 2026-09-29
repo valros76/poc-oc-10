@@ -1,0 +1,47 @@
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Routage SPA Vue.js
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+RewriteRule ^[^.]+$ index.html [L]
+
+Header always set Permissions-Policy "payment=(self \"[https://js.stripe.com](https://js.stripe.com)\")"
+Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" env=HTTPS
+Options -Indexes
+
+<Files "app-ads.txt">
+    ForceType text/plain
+</Files>
+
+# Mod Deflate (Compression)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/javascript application/rss+xml application/vnd.ms-fontobject application/x-font application/x-font-opentype application/x-font-otf application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/opentype font/otf font/ttf image/svg+xml image/x-icon text/css text/html text/javascript text/plain text/xml
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+  Header append Vary User-Agent
+</IfModule>
+Header append Vary User-Agent env=!dont-vary
+
+# Gestion du Cache
+<IfModule mod_headers.c>
+  Header unset Cache-Control
+  Header unset Expires
+  Header unset Pragma
+
+  <FilesMatch "^(index\.html|manifest\.json)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  <FilesMatch "\.(ico|pdf|flv|jpg|jpeg|png|gif|webp|svg|woff|woff2|ttf|otf|mp4|webm|css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  Header always set X-FRAME-OPTIONS "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+</IfModule>
