@@ -11,6 +11,7 @@ backend/config/.htpasswd
 # Dependencies
 /node_modules/
 /vendor/
+/backend/vendor/
 
 # Build & Output directories
 /dist/

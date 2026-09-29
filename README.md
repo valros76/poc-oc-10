@@ -43,11 +43,11 @@ L'API sera à l'écoute sur http://localhost:8000.
 
 ### Lancement de l'application Vue.js (Frontend)
 
-Ouvrez un terminal à la racine du dossier frontend :
+Ouvrez un terminal à la racine du dossier de projet :
 
 ```bash
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 Ouvrez le lien fourni par Vite (généralement http://localhost:5173).
@@ -60,6 +60,7 @@ Ouvrez le lien fourni par Vite (généralement http://localhost:5173).
 
 ```
 /frontend
+├── .htaccess               # Règles CORS
 ├── index.html
 ├── src/
 │   ├── components/
@@ -78,10 +79,13 @@ Ouvrez le lien fourni par Vite (généralement http://localhost:5173).
 ├── .htaccess               # Front Controller API et règles CORS
 ├── index.php               # Routeur principal de l'API
 ├── config.php
-├── Controllers/
+├── config/
+│   ├── .htaccess           # Blocage du dossier par url
+│   └── config.php
+├── controllers/
 │   └── api/
 │       └── audit.php       # Endpoint de traitement des leads
-├── Models/
+├── models/
 ├── sql/
 │   └── init.sql            # Table prospects (id, nom, url, email, reco...)
 └── tests/
@@ -116,6 +120,127 @@ Pour valider l'intégration technique du PoC :
 **Tests Backend :**
 
 - Tests unitaires avec PHPUnit : ./vendor/bin/phpunit tests (Couverture : ./vendor/bin/phpunit --coverage-text)
+
+---
+
+## Dépendances obligatoires
+
+### Frontend (frontend/package.json)
+
+- **Dépendances de production :**
+  - vue : Core framework (v3).
+
+  - vue-router : Gestion des routes et injection dynamique des méta-balises SEO.
+
+  - pinia : Store pour la gestion d'état centralisée.
+
+**Les requêtes vers le backend utiliseront l'API Fetch native de JS**.
+
+- **Dépendances de développement :**
+  - vite & @vitejs/plugin-vue : Serveur de dev et bundler.
+
+  - typescript : Typage du code.
+
+  - vitest & @vue/test-utils : Tests unitaires.
+
+  - @playwright/test : Tests End-to-End.
+
+**Commande d'installation frontend (racine du projet) :**
+
+```bash
+bun install -D @playwright/test
+```
+
+### Backend (backend/composer.json)
+
+- **Dépendance de production :**
+  - vlucas/phpdotenv : Permet de lire le fichier .env en PHP Vanilla.
+
+- **Dépendance de développement :**
+  - phpunit/phpunit : Suite de tests unitaires pour l'API.
+
+Commande d'installation backend :
+
+```bash
+cd backend
+composer require vlucas/phpdotenv
+composer require --dev phpunit/phpunit
+```
+
+---
+
+## Configuration ENV
+
+### frontend/.env
+
+```
+VITE_API_BASE_URL=http://localhost:VOTRE_PORT/backend
+```
+
+### frontend/.env.example
+
+```
+VITE_API_BASE_URL=http://localhost:VOTRE_PORT/backend
+```
+
+### backend/.env
+
+```
+DB_HOST=VOTRE_HOST
+DB_PORT=VOTRE_PORT
+DB_NAME=VOTRE_NOM_DE_BDD
+DB_USER=VOTRE_USERNAME
+DB_PASS=VOTRE_PASSWORD # ou vide si pas de password en local
+APP_ENV=local # ou prod
+```
+
+### backend/.env.example
+
+```
+DB_HOST=VOTRE_HOST
+DB_PORT=VOTRE_PORT
+DB_NAME=VOTRE_NOM_DE_BDD
+DB_USER=VOTRE_USERNAME
+DB_PASS=VOTRE_PASSWORD # ou vide si pas de password en local
+APP_ENV=local # ou prod
+```
+
+### Backend : Chargement du .env (backend/config/config.php)
+
+Le package `phpdotenv` permet de charger les variables globales sans exposer les identifiants dans le code.
+
+```php
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+// Chargement des variables d'environnement
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+$dotenv->safeLoad();
+
+$dbHost = $_ENV['DB_HOST'] ?? 'VOTRE_HOST';
+$dbPort = $_ENV['DB_PORT'] ?? 'VOTRE_PORT';
+$dbName = $_ENV['DB_NAME'] ?? 'VOTRE_NOM_De_BDD';
+$dbUser = $_ENV['DB_USER'] ?? 'VOTRE_USERNAME';
+$dbPass = $_ENV['DB_PASS'] ?? 'VOTRE_MOT_DE_PASSE';
+
+try {
+    $pdo = new PDO(
+        "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4",
+        $dbUser,
+        $dbPass,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+} catch (PDOException $e) {
+    http_response_code(500);
+    echo json_encode(['error' => 'Erreur de connexion à la base de données']);
+    exit;
+}
+```
 
 ---
 
