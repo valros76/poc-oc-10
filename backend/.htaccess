@@ -1,0 +1,55 @@
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Front Controller API
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^[^.]+$ index.php [L]
+
+Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" env=HTTPS
+Options -Indexes
+
+# Mod Deflate (Compression API)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE application/javascript application/rss+xml application/vnd.ms-fontobject application/x-font application/x-font-opentype application/x-font-otf application/x-font-truetype application/x-font-ttf application/x-javascript application/xhtml+xml application/xml font/opentype font/otf font/ttf image/svg+xml image/x-icon text/css text/html text/javascript text/plain text/xml
+  BrowserMatch ^Mozilla/4 gzip-only-text/html
+  BrowserMatch ^Mozilla/4\.0[678] no-gzip
+  BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+  Header append Vary User-Agent
+</IfModule>
+Header append Vary User-Agent env=!dont-vary
+
+# Entêtes CORS
+<IfModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  AddType application/x-font-woff .woff
+  AddType application/x-font-woff2 .woff2
+
+  Header always set X-FRAME-OPTIONS "SAMEORIGIN"
+  Header always set X-Content-Type-Options "nosniff"
+  Header set Connection keep-alive
+
+  <FilesMatch "\.(jpeg|webp|png|gif|svg\+xml|x-icon)$">
+    Header set Access-Control-Allow-Origin "*"
+    Header always set X-FRAME-OPTIONS "ALLOW FROM *"
+    Header always set X-Content-Type-Options "nosniff"
+    Header set Connection keep-alive
+  </FilesMatch>
+</IfModule>
+
+# Mod Expires
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1800 seconds"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType application/x-font-woff "access plus 1 year"
+  ExpiresByType application/x-font-ttf "access plus 1 year"
+  ExpiresByType text/css "access plus 1 month"
+</IfModule>
