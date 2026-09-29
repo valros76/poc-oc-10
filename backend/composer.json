@@ -2,6 +2,26 @@
     "require": {
         "vlucas/phpdotenv": "^5.7"
     },
+    "autoload": {
+        "psr-4": {
+            "Controllers\\": "controllers/",
+            "Models\\": "models/",
+            "Core\\": "core/",
+            "Utils\\": "utils/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite Unit",
+        "test:integration": "phpunit --testsuite Integration",
+        "test:coverage": "powershell \"$env:XDEBUG_MODE='coverage'; phpunit --coverage-html coverage-report\"",
+        "test:coverage:text": "powershell \"$env:XDEBUG_MODE='coverage'; phpunit --coverage-text\""
+    },
     "require-dev": {
         "phpunit/phpunit": "^13.3"
     }

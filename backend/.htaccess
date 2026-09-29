@@ -1,13 +1,18 @@
 RewriteEngine On
-RewriteCond %{HTTPS} !=on
-RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Ne pas réécrire ni rediriger les requêtes de pré-vol OPTIONS (nécessaire pour CORS)
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ - [L]
+
+# (Optionnel pour le dev local) Désactivation temporaire de la redirection HTTPS forcée si tu es en http://
+# RewriteCond %{HTTPS} !=on
+# RewriteRule .* https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
 # Front Controller API
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^[^.]+$ index.php [L]
+RewriteRule ^ index.php [QSA,L]
 
-Header always set Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" env=HTTPS
 Options -Indexes
 
 # Mod Deflate (Compression API)
@@ -23,6 +28,9 @@ Header append Vary User-Agent env=!dont-vary
 # Entêtes CORS
 <IfModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+  Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With, Accept"
+
   AddType application/x-font-woff .woff
   AddType application/x-font-woff2 .woff2
 

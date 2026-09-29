@@ -88,7 +88,15 @@ Ouvrez le lien fourni par Vite (généralement http://localhost:5173).
 ├── models/
 ├── sql/
 │   └── init.sql            # Table prospects (id, nom, url, email, reco...)
-└── tests/
+├── tests/
+│   ├── Unit/
+│   │   ├── ValidatorTest.php
+│   │   └── ResponseTest.php
+│   └── Integration/
+│       ├── ProspectModelTest.php
+│       └── EvaluationModelTest.php
+├── phpunit.xml
+└── composer.json
 ```
 
 ---
@@ -373,3 +381,100 @@ Fichier /backend/config/.htaccess :
 ```apache
 Require all denied
 ```
+
+## Modification de l'autoloader (Backend)
+
+Le backend du projet utilise la convention `PSR-4`, pour modifier l'autoloader, il faudra donc mettre à jour le fichier `composer.json` :
+
+```json
+"autoload": {
+        "psr-4": {
+            "Controllers\\": "controllers/",
+            "Models\\": "models/",
+            "Core\\": "core/",
+            "Utils\\": "utils/"
+        }
+    },
+```
+
+Et exécuter la commande :
+
+```bash
+composer dump-autoload
+```
+
+---
+
+## Prérequis pour les tests (Backend)
+
+Pour lancer les tests unitaires et d'intégration, avec le taux de coverage, il faudra installer `XDEBUG` sur votre version de PHP.
+
+Téléchargez la version `php_xdebug-3.x.x-8.5-ts-vs17-x86_64.dll`, sur [https://xdebug.org/download](https://xdebug.org/download), si vous utilisez la version 8.5 de PHP, ou prenez la version conforme à votre version actuelle.
+
+Ensuite, téléversez le fichier dans le dossier `/ext` de votre PHP local, puis renommez le fichier `php_xdebug.dll`.
+
+Ajoutez ensuite, dans `php.ini`, la ligne `zend_extension=xdebug`.
+
+### Lancement des tests
+
+Pour faciliter le lancement des tests unitaires et d'intégration, des **scripts composer** ont été créés :
+
+```json
+"scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite Unit",
+        "test:integration": "phpunit --testsuite Integration",
+        "test:coverage": "powershell \"$env:XDEBUG_MODE='coverage'; phpunit --coverage-html coverage-report\"",
+        "test:coverage:text": "powershell \"$env:XDEBUG_MODE='coverage'; phpunit --coverage-text\""
+    },
+```
+
+---
+
+## Audit du backend
+
+### Niveau de sécurité : Élevé
+
+Le backend couvre les vulnérabilités majeures du top 10 OWASP adaptées à un formulaire public :
+
+- Injections SQL (100 % couvert) : L'utilisation stricte de requêtes préparées PDO avec bindValue() et le typage explicite (PDO::PARAM_INT, PDO::PARAM_STR, PDO::PARAM_NULL) garantit une étanchéité totale contre les injections.
+
+- Faille XSS (100 % couvert) : Le passage systématique par Validator::sanitizeString() (htmlspecialchars, strip_tags) et les filtres natifs PHP (FILTER_VALIDATE_EMAIL, FILTER_VALIDATE_URL) empêche le stockage de scripts malveillants en base de données.
+
+- Protection contre le spam : Le mécanisme de Honeypot (web\*\*\*\*\_hp) piégé sur l'endpoint /api/audit neutralise les bots basiques en leur retournant un faux code 201 sans impacter la BDD.
+
+- Fuite d'informations (Information Disclosure) : Grâce à PDO::ERRMODE_SILENT et à la classe Response::json(), aucune erreur SQL brute, stack trace ou identifiant BDD ne peut fuiter en réponse HTTP. Les erreurs réelles sont isolées dans backend/logs/app.log.
+
+- CORS et isolation : Le serveur filtre les origines via FRONTEND_URL au lieu d'un joker \* permissif. Les secrets restent isolés dans .env, exclu de Git.
+  - Piste d'amélioration post-PoC : Il manque uniquement un Rate Limiting par IP (ex. 5 requêtes/heure) pour parer les attaques par déni de service ciblées (brute-force HTTP POST).
+
+### Respect des conventions API REST : Excellente conformité
+
+L'architecture respecte les piliers d'une API RESTful propre :
+
+#### Sans état (Statelessness)
+
+L'API ne stocke aucune session serveur. Chaque requête est autonome et contient toutes les données nécessaires à son exécution.
+
+#### Utilisation sémantique des verbes HTTP
+
+- **POST :** Utilisé pour la création de la ressource (/api/audit).
+
+- **OPTIONS :** Géré proprement pour la négociation des en-têtes CORS (preflight).
+
+#### Codes de statut HTTP stricts et normés
+
+Les réponses s'appuient sur des codes HTTP adaptés :
+
+| Code HTTP                 | Cas d'utilisation dans l'API                                  |
+| ------------------------- | ------------------------------------------------------------- |
+| 201 Created               | Ressource créée avec succès (prospect + évaluation).          |
+| 400 Bad Request           | JSON entrant corrompu ou illisible.                           |
+| 422 Unprocessable Entity  | Données manquantes ou invalides (nom vide, email incorrect).  |
+| 404 Not Found             | URL ou endpoint inexistant.                                   |
+| 405 Method Not Allowed    | Utilisation d'un mauvais verbe HTTP (ex. GET sur /api/audit). |
+| 500 Internal Server Error | Panne BDD ou erreur serveur imprévue.                         |
+
+#### Format d'échange unifié
+
+Toutes les réponses (succès comme erreurs) passent par Response::json(), garantissant un en-tête Content-Type: application/json; charset=utf-8 et une structure de charge utile prévisible pour le frontend Vue 3.

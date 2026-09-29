@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 !.env.*.example
+/backend/.env
 
 # Sensitive backend config & credentials
 backend/config/config.php
@@ -12,6 +13,10 @@ backend/config/.htpasswd
 /node_modules/
 /vendor/
 /backend/vendor/
+
+# Logs
+/logs/*.log
+/backend/logs/*.log
 
 # Build & Output directories
 /dist/
