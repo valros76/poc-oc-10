@@ -6,51 +6,47 @@ CREATE DATABASE IF NOT EXISTS `poc_hebergements`
 USE `poc_hebergements`;
 
 -- Nettoyage préalable (ordre respectant les clés étrangères)
-DROP TABLE IF EXISTS `evaluation`;
-DROP TABLE IF EXISTS `prospect`;
-DROP TABLE IF EXISTS `formule`;
+DROP TABLE IF EXISTS `evaluations`;
+DROP TABLE IF EXISTS `prospects`;
+DROP TABLE IF EXISTS `formules`;
 
 -- --------------------------------------------------------
--- Structure de la table : Formule
+-- Structure de la table : formules
 -- --------------------------------------------------------
-CREATE TABLE `formule` (
+CREATE TABLE `formules` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `nom` VARCHAR(100) NOT NULL,
-    `description` TEXT NULL
+    `description` TEXT NULL,
+    `prix` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `delai_realisation` VARCHAR(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- Structure de la table : Prospect
+-- Structure de la table : prospects
 -- --------------------------------------------------------
-CREATE TABLE `prospect` (
+CREATE TABLE `prospects` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `nom_etablissement` VARCHAR(255) NOT NULL,
     `type_hebergement` VARCHAR(100) DEFAULT NULL,
     `url_actuelle` VARCHAR(255) DEFAULT NULL,
-    `email` VARCHAR(255) NOT NULL
+    `email` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
--- Structure de la table : Evaluation
+-- Structure de la table : evaluations
 -- --------------------------------------------------------
-CREATE TABLE `evaluation` (
+CREATE TABLE `evaluations` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `prospect_id` INT NOT NULL,
     `score_visibilite` INT NOT NULL,
     `formule_recommandee_id` INT NOT NULL,
-    `date_creation` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT `fk_evaluation_prospect`
-        FOREIGN KEY (`prospect_id`) REFERENCES `prospect` (`id`)
+    `details_audit` TEXT NULL,
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_evaluations_prospect`
+        FOREIGN KEY (`prospect_id`) REFERENCES `prospects` (`id`)
         ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `fk_evaluation_formule`
-        FOREIGN KEY (`formule_recommandee_id`) REFERENCES `formule` (`id`)
+    CONSTRAINT `fk_evaluations_formule`
+        FOREIGN KEY (`formule_recommandee_id`) REFERENCES `formules` (`id`)
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
--- Données d'initialisation : Formules commerciales
--- --------------------------------------------------------
-INSERT INTO `formule` (`id`, `nom`, `description`) VALUES
-(1, "Essentiel", "Création de site vitrine optimisé SEO local pour présenter votre hébergement et capter vos premières demandes de contact."),
-(2, "Réservation directe", "Site internet complet intégrant un moteur de réservation direct sans commission et la synchronisation de votre planning."),
-(3, "Acquisition", "Solution clé en main avec site de réservation directe, SEO avancé et campagnes publicitaires ciblées pour maximiser votre taux d'occupation.");
