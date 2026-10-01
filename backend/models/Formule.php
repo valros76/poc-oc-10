@@ -20,7 +20,7 @@ class Formule {
     }
 
     public function findById(int $id): ?array {
-        $sql = "SELECT id, nom, description FROM formule WHERE id = :id";
+        $sql = "SELECT id, nom, description FROM formules WHERE id = :id";
         $req = $this->db->prepare($sql);
 
         if (!$req) {
@@ -40,7 +40,7 @@ class Formule {
     }
 
     public function findAll(): array {
-        $sql = "SELECT id, nom, description FROM formule";
+        $sql = "SELECT id, nom, description FROM formules";
         $req = $this->db->prepare($sql);
 
         if (!$req) {

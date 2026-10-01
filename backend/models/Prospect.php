@@ -20,8 +20,8 @@ class Prospect {
     }
 
     public function create(string $nomEtablissement, string $email, ?string $urlActuelle = null, ?string $typeHebergement = null): ?int {
-        $sql = "INSERT INTO prospect (nom_etablissement, type_hebergement, url_actuelle, email) 
-                VALUES (:nom, :type, :url, :email)";
+        $sql = "INSERT INTO prospects (nom_etablissement, type_hebergement, url_actuelle, email) 
+        VALUES (:nom, :type, :url, :email)";
         
         $req = $this->db->prepare($sql);
         if (!$req) {
@@ -54,7 +54,7 @@ class Prospect {
     }
 
     public function findByEmail(string $email): ?array {
-        $sql = "SELECT id, nom_etablissement, type_hebergement, url_actuelle, email FROM prospect WHERE email = :email";
+        $sql = "SELECT id, nom_etablissement, type_hebergement, url_actuelle, email FROM prospects WHERE email = :email";
         $req = $this->db->prepare($sql);
 
         if (!$req) {

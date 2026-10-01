@@ -50,3 +50,9 @@ CREATE TABLE `evaluations` (
         FOREIGN KEY (`formule_recommandee_id`) REFERENCES `formules` (`id`)
         ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 1. Insertion des Formules d'audit et d'accompagnement
+INSERT INTO `formules` (`id`, `nom`, `description`, `prix`, `delai_realisation`) VALUES 
+(1, 'Formule Essentielle', 'Audit complet de visibilité numérique, analyse SEO de base et recommandations de positionnement.', 149.00, '48h'),
+(2, 'Formule Pro', 'Audit approfondi, analyse de la concurrence locale, optimisation Google Business Profile et stratégie de mots-clés.', 299.00, '5 jours ouvrés'),
+(3, 'Formule Premium / Sur-mesure', 'Accompagnement complet, refonte de la stratégie digitale, suivi des performances et accompagnement technique.', 599.00, '10 jours ouvrés');
