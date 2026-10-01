@@ -9,7 +9,7 @@ const auditStore = useAuditStore();
 <template>
   <main class="gites-view">
     <header class="gites-header">
-      <h1>Audit & Visibilité pour Gîtes</h1>
+      <h1>Création de site internet pour gîte</h1>
       <p>
         Propriétaires de gîtes et meublés de tourisme, mesurez l'impact de votre présence en ligne.
       </p>
