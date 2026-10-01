@@ -2,7 +2,7 @@
 import type { ApiResponse } from '@/interfaces/prospect.interface';
 
 // Ajuste l'URL de base selon ton environnement local Laragon/PHP
-const API_BASE_URL = 'http://localhost/poc-oc-10/backend';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost/poc-oc-10/backend";
 
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
     const contentType = response.headers.get('content-type');
