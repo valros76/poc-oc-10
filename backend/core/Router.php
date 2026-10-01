@@ -1,26 +1,32 @@
 <?php
+
 namespace Core;
 
 use PDO;
 use Utils\Response;
 
-class Router {
+class Router
+{
     private array $routes = [];
     private PDO $db;
 
-    public function __construct(PDO $db) {
+    public function __construct(PDO $db)
+    {
         $this->db = $db;
     }
 
-    public function get(string $path, string $handler): void {
+    public function get(string $path, string $handler): void
+    {
         $this->addRoute('GET', $path, $handler);
     }
 
-    public function post(string $path, string $handler): void {
+    public function post(string $path, string $handler): void
+    {
         $this->addRoute('POST', $path, $handler);
     }
 
-    private function addRoute(string $method, string $path, string $handler): void {
+    private function addRoute(string $method, string $path, string $handler): void
+    {
         $this->routes[] = [
             'method'  => $method,
             'path'    => $path,
@@ -28,12 +34,19 @@ class Router {
         ];
     }
 
-    public function dispatch(string $requestMethod, string $requestUri): void {
+    public function dispatch(string $requestMethod, string $requestUri): void
+    {
         $path = parse_url($requestUri, PHP_URL_PATH);
+
+        // Nettoyage explicite du préfixe "/backend" s'il est présent
+        $basePath = "/backend";
+        if (str_starts_with($path, $basePath)) {
+            $path = substr($path, strlen($basePath));
+        }
 
         // Nettoyage optionnel du préfixe de dossier local si présent
         // Adapte '/poc-oc-10/backend' selon ton chemin exact ou rends-le dynamique
-        $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+        $scriptName = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
         if ($scriptName !== '/' && str_starts_with($path, $scriptName)) {
             $path = substr($path, strlen($scriptName));
         }

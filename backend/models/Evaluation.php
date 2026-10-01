@@ -21,8 +21,8 @@ class Evaluation {
 
     public function create(int $prospectId, int $scoreVisibilite, int $formuleRecommandeeId): ?int {
         // Remplacement de NOW() par CURRENT_TIMESTAMP (compatible MariaDB & SQLite)
-        $sql = "INSERT INTO evaluation (prospect_id, score_visibilite, formule_recommandee_id, date_creation) 
-                VALUES (:prospect_id, :score, :formule_id, CURRENT_TIMESTAMP)";
+        $sql = "INSERT INTO evaluations (prospect_id, score_visibilite, formule_recommandee_id, created_at) 
+        VALUES (:prospect_id, :score, :formule_id, CURRENT_TIMESTAMP)";
 
         $req = $this->db->prepare($sql);
         if (!$req) {
@@ -43,11 +43,11 @@ class Evaluation {
     }
 
     public function findByProspectId(int $prospectId): array {
-        $sql = "SELECT e.id, e.score_visibilite, e.date_creation, f.nom AS formule_nom, f.description AS formule_description
-                FROM evaluation e
-                JOIN formule f ON e.formule_recommandee_id = f.id
-                WHERE e.prospect_id = :prospect_id
-                ORDER BY e.date_creation DESC";
+        $sql = "SELECT e.id, e.score_visibilite, e.created_at AS date_creation, f.nom AS formule_nom, f.description AS formule_description
+        FROM evaluations e
+        JOIN formules f ON e.formule_recommandee_id = f.id
+        WHERE e.prospect_id = :prospect_id
+        ORDER BY e.created_at DESC";
 
         $req = $this->db->prepare($sql);
         if (!$req) {
