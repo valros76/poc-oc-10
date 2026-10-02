@@ -75,7 +75,7 @@ const router = createRouter({
 });
 
 // Hook beforeEach pour injecter dynamiquement le SEO
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
     const defaultTitle = "Webdevoo Hébergements - Solutions digitales";
     document.title = (to.meta.title as string) || defaultTitle;
 
@@ -86,8 +86,6 @@ router.beforeEach((to, from, next) => {
         const metaDesc = to.meta.description as string;
         metaDescriptionTag.setAttribute('content', metaDesc || defaultDescription);
     }
-
-    next();
 });
 
 export default router;
